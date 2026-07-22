@@ -1,30 +1,24 @@
-import { Pool } from "pg";
-import { drizzle } from "drizzle-orm/node-postgres";
+import Database from "better-sqlite3";
+import { drizzle } from "drizzle-orm/better-sqlite3";
 import * as schema from "./schema";
 
 /**
- * Connexion PostgreSQL via Supabase
+ * Connexion SQLite unique et partagée.
  */
 
-const globalForDb = globalThis as unknown as {
-  __crmPool?: Pool;
-};
+const globalForDb = globalThis as unknown as { __crmSqlite?: Database.Database };
 
-const pool =
-  globalForDb.__crmPool ??
+const sqlite =
+  globalForDb.__crmSqlite ??
   (() => {
-    if (!process.env.DATABASE_URL) {
-      throw new Error("DATABASE_URL environment variable is required");
-    }
-    return new Pool({
-      connectionString: process.env.DATABASE_URL,
-    });
+    const conn = new Database(":memory:");
+    conn.pragma("journal_mode = WAL");
+    conn.pragma("foreign_keys = ON");
+    return conn;
   })();
 
-if (process.env.NODE_ENV !== "production") {
-  globalForDb.__crmPool = pool;
-}
+if (process.env.NODE_ENV !== "production") globalForDb.__crmSqlite = sqlite;
 
-export const db = drizzle(pool, { schema });
+export const db = drizzle(sqlite, { schema });
 export { schema };
 export * from "./schema";
