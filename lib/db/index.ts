@@ -1,31 +1,30 @@
-import fs from "node:fs";
-import path from "node:path";
-import Database from "better-sqlite3";
-import { drizzle } from "drizzle-orm/better-sqlite3";
+import { Pool } from "pg";
+import { drizzle } from "drizzle-orm/node-postgres";
 import * as schema from "./schema";
 
 /**
- * Connexion SQLite unique et partagée.
- * En développement, Next.js recharge les modules à chaque édition : on met la
- * connexion en cache sur `globalThis` pour éviter d'ouvrir des dizaines de handles.
+ * Connexion PostgreSQL via Supabase
  */
 
-const dbPath = path.resolve(process.cwd(), process.env.DATABASE_URL ?? "./data/crm.db");
-fs.mkdirSync(path.dirname(dbPath), { recursive: true });
+const globalForDb = globalThis as unknown as {
+  __crmPool?: Pool;
+};
 
-const globalForDb = globalThis as unknown as { __crmSqlite?: Database.Database };
-
-const sqlite =
-  globalForDb.__crmSqlite ??
+const pool =
+  globalForDb.__crmPool ??
   (() => {
-    const conn = new Database(dbPath);
-    conn.pragma("journal_mode = WAL");
-    conn.pragma("foreign_keys = ON");
-    return conn;
+    if (!process.env.DATABASE_URL) {
+      throw new Error("DATABASE_URL environment variable is required");
+    }
+    return new Pool({
+      connectionString: process.env.DATABASE_URL,
+    });
   })();
 
-if (process.env.NODE_ENV !== "production") globalForDb.__crmSqlite = sqlite;
+if (process.env.NODE_ENV !== "production") {
+  globalForDb.__crmPool = pool;
+}
 
-export const db = drizzle(sqlite, { schema });
+export const db = drizzle(pool, { schema });
 export { schema };
 export * from "./schema";
