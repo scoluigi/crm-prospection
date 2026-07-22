@@ -1,0 +1,18 @@
+{
+  "buildCommand": "npm run build",
+  "devCommand": "npm run dev",
+  "installCommand": "npm install",
+  "framework": "nextjs",
+  "env": [
+    {
+      "key": "DATABASE_URL",
+      "value": "file:./data/crm.db",
+      "type": "secret"
+    },
+    {
+      "key": "AUTH_SECRET",
+      "value": "dev-secret-key-change-in-production",
+      "type": "secret"
+    }
+  ]
+}
