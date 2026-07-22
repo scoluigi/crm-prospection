@@ -233,7 +233,7 @@ export async function commitImport(
         ["notes", r.notes],
       ];
       for (const [field, value] of fillable) {
-        if (value !== null && value !== "" && !existing[field]) patch[field] = value;
+        if (value !== null && value !== "" && !existing[field as keyof typeof existing]) patch[field as keyof typeof patch] = value;
       }
 
       if (Object.keys(patch).length > 0) {

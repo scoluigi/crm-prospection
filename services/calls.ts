@@ -141,7 +141,7 @@ export async function callsTodayByUser(): Promise<Record<string, number>> {
     .where(gte(calls.calledAt, startOfTodayMs()))
     .groupBy(calls.userId);
 
-  return Object.fromEntries(rows.map((r) => [r.userId, r.n]));
+  return Object.fromEntries(rows.map((r: any) => [r.userId, r.n]));
 }
 
 /** Appels par jour sur les N derniers jours, pour le mini-graphique du dashboard. */
@@ -156,7 +156,7 @@ export async function callsPerDay(days = 14): Promise<{ date: string; count: num
     .where(gte(calls.calledAt, since))
     .groupBy(sql`date(${calls.calledAt} / 1000, 'unixepoch', 'localtime')`);
 
-  const map = new Map(rows.map((r) => [r.date, r.count]));
+  const map = new Map<string, number>(rows.map((r: any) => [r.date, r.count]));
   const out: { date: string; count: number }[] = [];
   for (let i = days - 1; i >= 0; i--) {
     const d = new Date();
@@ -164,7 +164,7 @@ export async function callsPerDay(days = 14): Promise<{ date: string; count: num
     const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(
       d.getDate(),
     ).padStart(2, "0")}`;
-    out.push({ date: iso, count: map.get(iso) ?? 0 });
+    out.push({ date: iso, count: (map.get(iso) ?? 0) as number });
   }
   return out;
 }

@@ -79,7 +79,7 @@ export async function getDashboardStats(): Promise<DashboardStats> {
   ]);
 
   const t = totals[0];
-  const statusMap = new Map(statusRows.map((r) => [r.status, r]));
+  const statusMap = new Map(statusRows.map((r: any) => [r.status, r]));
 
   return {
     totalProspects: Number(t?.total ?? 0),
@@ -96,10 +96,10 @@ export async function getDashboardStats(): Promise<DashboardStats> {
     wonCount: Number(t?.won ?? 0),
     wonAmount: Number(t?.wonAmount ?? 0),
     pipelineAmount: Number(t?.pipelineAmount ?? 0),
-    byStatus: PROSPECT_STATUSES.map((status) => ({
+    byStatus: PROSPECT_STATUSES.map((status: any) => ({
       status,
-      count: Number(statusMap.get(status)?.count ?? 0),
-      amount: Number(statusMap.get(status)?.amount ?? 0),
+      count: Number((statusMap.get(status) as any)?.count ?? 0),
+      amount: Number((statusMap.get(status) as any)?.amount ?? 0),
     })),
   };
 }
@@ -172,27 +172,27 @@ export async function getTeamPerformance(): Promise<UserPerformance[]> {
       .groupBy(reminders.assigneeId),
   ]);
 
-  const p = new Map(prospectRows.map((r) => [r.ownerId, r]));
-  const c = new Map(callRows.map((r) => [r.userId, r]));
-  const t = new Map(taskRows.map((r) => [r.assigneeId, r]));
-  const r = new Map(reminderRows.map((x) => [x.assigneeId, x]));
+  const p = new Map(prospectRows.map((r: any) => [r.ownerId, r]));
+  const c = new Map(callRows.map((r: any) => [r.userId, r]));
+  const t = new Map(taskRows.map((r: any) => [r.assigneeId, r]));
+  const r = new Map(reminderRows.map((x: any) => [x.assigneeId, x]));
 
   return team
-    .map((u) => ({
+    .map((u: any) => ({
       userId: u.id,
       name: u.name,
       color: u.color,
-      prospects: Number(p.get(u.id)?.total ?? 0),
-      activeProspects: Number(p.get(u.id)?.active ?? 0),
-      hotProspects: Number(p.get(u.id)?.hot ?? 0),
-      callsToday: Number(c.get(u.id)?.today ?? 0),
-      callsWeek: Number(c.get(u.id)?.week ?? 0),
-      openTasks: Number(t.get(u.id)?.open ?? 0),
-      overdueTasks: Number(t.get(u.id)?.overdue ?? 0),
-      doneTasksToday: Number(t.get(u.id)?.doneToday ?? 0),
-      overdueReminders: Number(r.get(u.id)?.overdue ?? 0),
-      won: Number(p.get(u.id)?.won ?? 0),
-      pipelineAmount: Number(p.get(u.id)?.pipeline ?? 0),
+      prospects: Number((p.get(u.id) as any)?.total ?? 0),
+      activeProspects: Number((p.get(u.id) as any)?.active ?? 0),
+      hotProspects: Number((p.get(u.id) as any)?.hot ?? 0),
+      callsToday: Number((c.get(u.id) as any)?.today ?? 0),
+      callsWeek: Number((c.get(u.id) as any)?.week ?? 0),
+      openTasks: Number((t.get(u.id) as any)?.open ?? 0),
+      overdueTasks: Number((t.get(u.id) as any)?.overdue ?? 0),
+      doneTasksToday: Number((t.get(u.id) as any)?.doneToday ?? 0),
+      overdueReminders: Number((r.get(u.id) as any)?.overdue ?? 0),
+      won: Number((p.get(u.id) as any)?.won ?? 0),
+      pipelineAmount: Number((p.get(u.id) as any)?.pipeline ?? 0),
     }))
     .sort((a, b) => b.callsToday - a.callsToday || b.activeProspects - a.activeProspects);
 }

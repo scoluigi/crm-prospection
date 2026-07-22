@@ -176,8 +176,8 @@ export async function getFilterOptions(): Promise<{ cities: string[]; sectors: s
     .orderBy(asc(prospects.sector));
 
   return {
-    cities: cityRows.map((r) => r.v).filter((v): v is string => Boolean(v)),
-    sectors: sectorRows.map((r) => r.v).filter((v): v is string => Boolean(v)),
+    cities: cityRows.map((r: any) => r.v).filter((v: any): v is string => Boolean(v)),
+    sectors: sectorRows.map((r: any) => r.v).filter((v: any): v is string => Boolean(v)),
   };
 }
 

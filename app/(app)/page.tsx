@@ -141,7 +141,7 @@ export default async function DashboardPage() {
             <EmptyState icon={Flame} title="Aucune opportunité chaude pour le moment" />
           ) : (
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {hotProspects.map((p) => (
+              {hotProspects.map((p: any) => (
                 <Link
                   key={p.id}
                   href={`/prospects/${p.id}`}

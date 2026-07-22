@@ -77,7 +77,7 @@ export default async function TodayPage() {
               <EmptyState icon={Flame} title="Aucun prospect chaud pour l'instant" className="py-6" />
             ) : (
               <div className="flex flex-col divide-y divide-slate-100">
-                {hotProspects.map((p) => (
+                {hotProspects.map((p: any) => (
                   <Link
                     key={p.id}
                     href={`/prospects/${p.id}`}
