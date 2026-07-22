@@ -1,0 +1,100 @@
+@import "tailwindcss";
+
+/* ---------------------------------------------------------------------------
+   Design tokens — thème clair unique, orienté productivité.
+   --------------------------------------------------------------------------- */
+
+@theme {
+  --color-background: #f6f7f9;
+  --color-surface: #ffffff;
+  --color-foreground: #0f172a;
+  --color-muted: #64748b;
+  --color-border: #e2e8f0;
+  --color-brand: #4f46e5;
+  --color-brand-foreground: #ffffff;
+
+  --radius-card: 0.75rem;
+
+  --font-sans:
+    ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
+  html,
+  body {
+    height: 100%;
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Un CRM se pilote au clavier : l'anneau de focus doit rester très visible. */
+  :focus-visible {
+    outline: 2px solid var(--color-brand);
+    outline-offset: 2px;
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 9999px;
+    border: 3px solid transparent;
+    background-clip: content-box;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+    background-clip: content-box;
+  }
+}
+
+@layer utilities {
+  /* Masque la barre de défilement horizontale du Kanban sans bloquer le scroll. */
+  .scrollbar-thin::-webkit-scrollbar {
+    height: 6px;
+    width: 6px;
+  }
+
+  .animate-in-fade {
+    animation: fade-in 0.15s ease-out;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(2px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Carte Kanban en cours de déplacement. */
+.kanban-dragging {
+  opacity: 0.4;
+}
+
+.kanban-drop-target {
+  background-color: #eef2ff;
+  outline: 2px dashed #a5b4fc;
+  outline-offset: -4px;
+}
+
+/* Impression : on ne garde que le contenu principal. */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+}
