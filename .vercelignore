@@ -1,0 +1,17 @@
+.git
+.gitignore
+README.md
+DEPLOYMENT.md
+.env.example
+.env
+.vercel
+.next
+.claude
+scripts
+data
+*.db
+*.db-shm
+*.db-wal
+node_modules
+.turbo
+.eslintrc.json
