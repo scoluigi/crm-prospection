@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { index, integer, real, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { boolean, index, integer, pgTable, text, real } from "drizzle-orm/pg-core";
 import type {
   ActivityType,
   CallOutcome,
@@ -19,13 +19,13 @@ import type {
  *   ce qui évite tout décalage de fuseau horaire sur les comparaisons « aujourd'hui ».
  */
 
-const now = sql`(unixepoch() * 1000)`;
+const now = sql`(extract(epoch from now()) * 1000)::bigint`;
 
 // ---------------------------------------------------------------------------
 // Utilisateurs (les 3 associés)
 // ---------------------------------------------------------------------------
 
-export const users = sqliteTable("users", {
+export const users = pgTable("users", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
   email: text("email").notNull().unique(),
@@ -33,7 +33,7 @@ export const users = sqliteTable("users", {
   role: text("role").$type<UserRole>().notNull().default("associe"),
   /** Couleur d'accent utilisée pour l'avatar et les graphiques d'équipe. */
   color: text("color").notNull().default("#6366f1"),
-  active: integer("active", { mode: "boolean" }).notNull().default(true),
+  active: boolean("active").notNull().default(true),
   createdAt: integer("created_at").notNull().default(now),
 });
 
@@ -41,7 +41,7 @@ export const users = sqliteTable("users", {
 // Prospects
 // ---------------------------------------------------------------------------
 
-export const prospects = sqliteTable(
+export const prospects = pgTable(
   "prospects",
   {
     id: text("id").primaryKey(),
@@ -84,7 +84,7 @@ export const prospects = sqliteTable(
 // Tâches (todo quotidienne)
 // ---------------------------------------------------------------------------
 
-export const tasks = sqliteTable(
+export const tasks = pgTable(
   "tasks",
   {
     id: text("id").primaryKey(),
@@ -114,7 +114,7 @@ export const tasks = sqliteTable(
 // Appels (cold call & rappels)
 // ---------------------------------------------------------------------------
 
-export const calls = sqliteTable(
+export const calls = pgTable(
   "calls",
   {
     id: text("id").primaryKey(),
@@ -137,7 +137,7 @@ export const calls = sqliteTable(
 // Relances
 // ---------------------------------------------------------------------------
 
-export const reminders = sqliteTable(
+export const reminders = pgTable(
   "reminders",
   {
     id: text("id").primaryKey(),
@@ -167,7 +167,7 @@ export const reminders = sqliteTable(
 // Notes internes
 // ---------------------------------------------------------------------------
 
-export const notes = sqliteTable(
+export const notes = pgTable(
   "notes",
   {
     id: text("id").primaryKey(),
@@ -187,7 +187,7 @@ export const notes = sqliteTable(
 // Journal d'activité
 // ---------------------------------------------------------------------------
 
-export const activityLogs = sqliteTable(
+export const activityLogs = pgTable(
   "activity_logs",
   {
     id: text("id").primaryKey(),

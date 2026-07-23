@@ -1,44 +1,31 @@
-# Setup Supabase - 5 minutes ⚡
+# 🚀 Setup Supabase PostgreSQL pour le CRM
 
-## 1️⃣ Créer un compte (2 min)
+## 3 étapes simples (2 minutes)
 
-Aller sur → https://app.supabase.com/sign-up
+### 1️⃣ Créer un projet Supabase
 
-Authentifier avec : GitHub / Google / Email
+Visite : https://app.supabase.com/projects
 
-## 2️⃣ Créer un projet (2 min)
+- Clique **"New Project"**
+- Nom : `crm-prospection`
+- Password: `futurriche540000@`
+- Region : `Europe (eu-west-1)`
+- Clique **"Create new project"** → **Attends 2 min**
 
-1. Dashboard → "New Project"
-2. Nom : `crm-prospection`
-3. Database Password : garder celui généré
-4. Region : choisir la plus proche (Europe si possible)
-5. Cliquer "Create new project"
-6. **Attendre 2-3 min** (provisioning...)
+### 2️⃣ Copier la DATABASE_URL
 
-## 3️⃣ Obtenir la Connection String (1 min)
-
-Une fois le projet créé :
-
-1. Aller dans **Settings** (bas à gauche)
-2. Cliquer **Database**
-3. Aller dans l'onglet **Connection pooling**
-4. Copier la string qui commence par `postgresql://`
-
-Format :
+Une fois créé (Settings → Database → Connection string):
 ```
-postgresql://postgres:[PASSWORD]@[HOST]:6543/postgres
+postgresql://postgres:PASSWORD@db.PROJECT_ID.supabase.co:5432/postgres
 ```
 
-## 4️⃣ Me donner la connection string
+### 3️⃣ Configure Vercel Environment Variables
 
-Copie-la ici (privatement) et je configure tout le reste !
+Dans https://vercel.com/dashboard → ton projet → Settings → Environment Variables
 
+Ajoute :
 ```
-DATABASE_URL = postgresql://postgres:...
+DATABASE_URL = postgresql://postgres:futurriche540000@db.YOUR_PROJECT_ID.supabase.co:5432/postgres
 ```
 
----
-
-## ✅ C'est tout !
-
-Pas de CLI, pas de token, juste PostgreSQL standard.
+C'est tout ! Les migrations et seed data se lancent automatiquement au déploiement.

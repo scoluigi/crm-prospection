@@ -1,38 +1,39 @@
-import Database from "better-sqlite3";
-import { drizzle } from "drizzle-orm/better-sqlite3";
-import { migrate } from "drizzle-orm/better-sqlite3/migrator";
+import { Pool } from "pg";
+import { drizzle } from "drizzle-orm/node-postgres";
+import { migrate } from "drizzle-orm/node-postgres/migrator";
 import * as schema from "./schema";
 import path from "path";
 
 const globalForDb = globalThis as unknown as {
-  __crmDb?: Database.Database;
+  __crmPool?: Pool;
 };
 
-const dbPath = process.env.DATABASE_URL?.replace("file:", "") || "./data/crm.db";
-
-const sqliteDb =
-  globalForDb.__crmDb ??
+const pool =
+  globalForDb.__crmPool ??
   (() => {
-    const db = new Database(dbPath);
-    db.pragma("journal_mode = WAL");
-
-    // Run migrations automatically
-    try {
-      const migrationsPath = path.join(process.cwd(), "drizzle");
-      migrate(drizzle(db, { schema }), {
-        migrationsFolder: migrationsPath,
-      });
-    } catch (err) {
-      console.warn("Migration warning:", err);
+    if (!process.env.DATABASE_URL) {
+      throw new Error("DATABASE_URL is required");
     }
-
-    return db;
+    return new Pool({
+      connectionString: process.env.DATABASE_URL,
+    });
   })();
 
 if (process.env.NODE_ENV !== "production") {
-  globalForDb.__crmDb = sqliteDb;
+  globalForDb.__crmPool = pool;
 }
 
-export const db = drizzle(sqliteDb, { schema });
-export { schema };
+const db = drizzle(pool, { schema });
+
+// Run migrations automatically on startup (production + dev)
+if (process.env.NODE_ENV === "production" || process.env.RUN_MIGRATIONS === "true") {
+  migrate(db, {
+    migrationsFolder: path.join(process.cwd(), "drizzle"),
+  }).catch(err => {
+    console.error("Migration error:", err);
+    process.exit(1);
+  });
+}
+
+export { db, schema };
 export * from "./schema";
