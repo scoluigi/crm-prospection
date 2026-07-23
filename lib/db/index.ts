@@ -2,23 +2,22 @@ import Database from "better-sqlite3";
 import { drizzle } from "drizzle-orm/better-sqlite3";
 import * as schema from "./schema";
 
-/**
- * Connexion SQLite unique et partagée.
- */
+const globalForDb = globalThis as unknown as {
+  __crmDb?: Database.Database;
+};
 
-const globalForDb = globalThis as unknown as { __crmSqlite?: Database.Database };
+const dbPath = process.env.DATABASE_URL?.replace("file:", "") || "./data/crm.db";
 
-const sqlite =
-  globalForDb.__crmSqlite ??
+const sqliteDb =
+  globalForDb.__crmDb ??
   (() => {
-    const conn = new Database(":memory:");
-    conn.pragma("journal_mode = WAL");
-    conn.pragma("foreign_keys = ON");
-    return conn;
+    return new Database(dbPath);
   })();
 
-if (process.env.NODE_ENV !== "production") globalForDb.__crmSqlite = sqlite;
+if (process.env.NODE_ENV !== "production") {
+  globalForDb.__crmDb = sqliteDb;
+}
 
-export const db = drizzle(sqlite, { schema });
+export const db = drizzle(sqliteDb, { schema });
 export { schema };
 export * from "./schema";

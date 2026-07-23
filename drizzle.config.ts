@@ -5,6 +5,6 @@ export default {
   out: "./drizzle",
   dialect: "sqlite",
   dbCredentials: {
-    url: ":memory:",
+    url: process.env.DATABASE_URL || "file:./data/crm.db",
   },
 } satisfies Config;
