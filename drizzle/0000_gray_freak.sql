@@ -5,7 +5,7 @@ CREATE TABLE "activity_logs" (
 	"prospect_id" text,
 	"message" text NOT NULL,
 	"meta" text,
-	"created_at" integer DEFAULT (extract(epoch from now()) * 1000)::bigint NOT NULL
+	"created_at" bigint DEFAULT (extract(epoch from now()) * 1000)::bigint NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "calls" (
@@ -15,7 +15,7 @@ CREATE TABLE "calls" (
 	"outcome" text NOT NULL,
 	"notes" text,
 	"duration_min" integer,
-	"called_at" integer DEFAULT (extract(epoch from now()) * 1000)::bigint NOT NULL
+	"called_at" bigint DEFAULT (extract(epoch from now()) * 1000)::bigint NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "notes" (
@@ -23,7 +23,7 @@ CREATE TABLE "notes" (
 	"prospect_id" text NOT NULL,
 	"author_id" text NOT NULL,
 	"content" text NOT NULL,
-	"created_at" integer DEFAULT (extract(epoch from now()) * 1000)::bigint NOT NULL
+	"created_at" bigint DEFAULT (extract(epoch from now()) * 1000)::bigint NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "prospects" (
@@ -39,14 +39,14 @@ CREATE TABLE "prospects" (
 	"status" text DEFAULT 'a_contacter' NOT NULL,
 	"interest" text DEFAULT 'inconnu' NOT NULL,
 	"owner_id" text NOT NULL,
-	"last_contact_at" integer,
+	"last_contact_at" bigint,
 	"next_follow_up" text,
 	"notes" text,
 	"estimated_amount" real,
 	"identified_need" text,
 	"dedupe_key" text,
-	"created_at" integer DEFAULT (extract(epoch from now()) * 1000)::bigint NOT NULL,
-	"updated_at" integer DEFAULT (extract(epoch from now()) * 1000)::bigint NOT NULL
+	"created_at" bigint DEFAULT (extract(epoch from now()) * 1000)::bigint NOT NULL,
+	"updated_at" bigint DEFAULT (extract(epoch from now()) * 1000)::bigint NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "reminders" (
@@ -57,8 +57,8 @@ CREATE TABLE "reminders" (
 	"status" text DEFAULT 'pending' NOT NULL,
 	"channel" text DEFAULT 'appel' NOT NULL,
 	"note" text,
-	"completed_at" integer,
-	"created_at" integer DEFAULT (extract(epoch from now()) * 1000)::bigint NOT NULL
+	"completed_at" bigint,
+	"created_at" bigint DEFAULT (extract(epoch from now()) * 1000)::bigint NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "tasks" (
@@ -72,9 +72,9 @@ CREATE TABLE "tasks" (
 	"due_date" text NOT NULL,
 	"comment" text,
 	"created_by_id" text,
-	"completed_at" integer,
-	"created_at" integer DEFAULT (extract(epoch from now()) * 1000)::bigint NOT NULL,
-	"updated_at" integer DEFAULT (extract(epoch from now()) * 1000)::bigint NOT NULL
+	"completed_at" bigint,
+	"created_at" bigint DEFAULT (extract(epoch from now()) * 1000)::bigint NOT NULL,
+	"updated_at" bigint DEFAULT (extract(epoch from now()) * 1000)::bigint NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "users" (
@@ -85,7 +85,7 @@ CREATE TABLE "users" (
 	"role" text DEFAULT 'associe' NOT NULL,
 	"color" text DEFAULT '#6366f1' NOT NULL,
 	"active" boolean DEFAULT true NOT NULL,
-	"created_at" integer DEFAULT (extract(epoch from now()) * 1000)::bigint NOT NULL,
+	"created_at" bigint DEFAULT (extract(epoch from now()) * 1000)::bigint NOT NULL,
 	CONSTRAINT "users_email_unique" UNIQUE("email")
 );
 --> statement-breakpoint

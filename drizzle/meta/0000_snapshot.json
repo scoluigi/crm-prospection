@@ -1,5 +1,5 @@
 {
-  "id": "98229085-7537-4184-8eaf-8c91d5c18519",
+  "id": "5c9d4136-e5b7-4e55-bac4-a83b314aa631",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -46,7 +46,7 @@
         },
         "created_at": {
           "name": "created_at",
-          "type": "integer",
+          "type": "bigint",
           "primaryKey": false,
           "notNull": true,
           "default": "(extract(epoch from now()) * 1000)::bigint"
@@ -160,7 +160,7 @@
         },
         "called_at": {
           "name": "called_at",
-          "type": "integer",
+          "type": "bigint",
           "primaryKey": false,
           "notNull": true,
           "default": "(extract(epoch from now()) * 1000)::bigint"
@@ -262,7 +262,7 @@
         },
         "created_at": {
           "name": "created_at",
-          "type": "integer",
+          "type": "bigint",
           "primaryKey": false,
           "notNull": true,
           "default": "(extract(epoch from now()) * 1000)::bigint"
@@ -399,7 +399,7 @@
         },
         "last_contact_at": {
           "name": "last_contact_at",
-          "type": "integer",
+          "type": "bigint",
           "primaryKey": false,
           "notNull": false
         },
@@ -435,14 +435,14 @@
         },
         "created_at": {
           "name": "created_at",
-          "type": "integer",
+          "type": "bigint",
           "primaryKey": false,
           "notNull": true,
           "default": "(extract(epoch from now()) * 1000)::bigint"
         },
         "updated_at": {
           "name": "updated_at",
-          "type": "integer",
+          "type": "bigint",
           "primaryKey": false,
           "notNull": true,
           "default": "(extract(epoch from now()) * 1000)::bigint"
@@ -581,13 +581,13 @@
         },
         "completed_at": {
           "name": "completed_at",
-          "type": "integer",
+          "type": "bigint",
           "primaryKey": false,
           "notNull": false
         },
         "created_at": {
           "name": "created_at",
-          "type": "integer",
+          "type": "bigint",
           "primaryKey": false,
           "notNull": true,
           "default": "(extract(epoch from now()) * 1000)::bigint"
@@ -743,20 +743,20 @@
         },
         "completed_at": {
           "name": "completed_at",
-          "type": "integer",
+          "type": "bigint",
           "primaryKey": false,
           "notNull": false
         },
         "created_at": {
           "name": "created_at",
-          "type": "integer",
+          "type": "bigint",
           "primaryKey": false,
           "notNull": true,
           "default": "(extract(epoch from now()) * 1000)::bigint"
         },
         "updated_at": {
           "name": "updated_at",
-          "type": "integer",
+          "type": "bigint",
           "primaryKey": false,
           "notNull": true,
           "default": "(extract(epoch from now()) * 1000)::bigint"
@@ -907,7 +907,7 @@
         },
         "created_at": {
           "name": "created_at",
-          "type": "integer",
+          "type": "bigint",
           "primaryKey": false,
           "notNull": true,
           "default": "(extract(epoch from now()) * 1000)::bigint"

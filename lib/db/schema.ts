@@ -1,5 +1,8 @@
 import { sql } from "drizzle-orm";
-import { boolean, index, integer, pgTable, text, real } from "drizzle-orm/pg-core";
+import { bigint, boolean, index, integer, pgTable, text, real } from "drizzle-orm/pg-core";
+
+/** Horodatage epoch en millisecondes : dépasse int32, doit être un bigint en PostgreSQL. */
+const ts = (name: string) => bigint(name, { mode: "number" });
 import type {
   ActivityType,
   CallOutcome,
@@ -34,7 +37,7 @@ export const users = pgTable("users", {
   /** Couleur d'accent utilisée pour l'avatar et les graphiques d'équipe. */
   color: text("color").notNull().default("#6366f1"),
   active: boolean("active").notNull().default(true),
-  createdAt: integer("created_at").notNull().default(now),
+  createdAt: ts("created_at").notNull().default(now),
 });
 
 // ---------------------------------------------------------------------------
@@ -59,7 +62,7 @@ export const prospects = pgTable(
       .notNull()
       .references(() => users.id),
     /** Date/heure du dernier appel ou échange enregistré (epoch ms). */
-    lastContactAt: integer("last_contact_at"),
+    lastContactAt: ts("last_contact_at"),
     /** Prochaine relance planifiée, format `YYYY-MM-DD`. Miroir de la relance en attente la plus proche. */
     nextFollowUp: text("next_follow_up"),
     notes: text("notes"),
@@ -69,8 +72,8 @@ export const prospects = pgTable(
     identifiedNeed: text("identified_need"),
     /** Clé de déduplication : téléphone normalisé + nom d'entreprise normalisé. */
     dedupeKey: text("dedupe_key"),
-    createdAt: integer("created_at").notNull().default(now),
-    updatedAt: integer("updated_at").notNull().default(now),
+    createdAt: ts("created_at").notNull().default(now),
+    updatedAt: ts("updated_at").notNull().default(now),
   },
   (t) => [
     index("prospects_status_idx").on(t.status),
@@ -99,9 +102,9 @@ export const tasks = pgTable(
     dueDate: text("due_date").notNull(),
     comment: text("comment"),
     createdById: text("created_by_id").references(() => users.id),
-    completedAt: integer("completed_at"),
-    createdAt: integer("created_at").notNull().default(now),
-    updatedAt: integer("updated_at").notNull().default(now),
+    completedAt: ts("completed_at"),
+    createdAt: ts("created_at").notNull().default(now),
+    updatedAt: ts("updated_at").notNull().default(now),
   },
   (t) => [
     index("tasks_due_idx").on(t.dueDate),
@@ -128,7 +131,7 @@ export const calls = pgTable(
     notes: text("notes"),
     /** Durée de l'appel en minutes (saisie optionnelle). */
     durationMin: integer("duration_min"),
-    calledAt: integer("called_at").notNull().default(now),
+    calledAt: ts("called_at").notNull().default(now),
   },
   (t) => [index("calls_prospect_idx").on(t.prospectId), index("calls_date_idx").on(t.calledAt)],
 );
@@ -153,8 +156,8 @@ export const reminders = pgTable(
     status: text("status").$type<"pending" | "done" | "cancelled">().notNull().default("pending"),
     channel: text("channel").$type<"appel" | "email" | "sms" | "autre">().notNull().default("appel"),
     note: text("note"),
-    completedAt: integer("completed_at"),
-    createdAt: integer("created_at").notNull().default(now),
+    completedAt: ts("completed_at"),
+    createdAt: ts("created_at").notNull().default(now),
   },
   (t) => [
     index("reminders_due_idx").on(t.dueDate),
@@ -178,7 +181,7 @@ export const notes = pgTable(
       .notNull()
       .references(() => users.id),
     content: text("content").notNull(),
-    createdAt: integer("created_at").notNull().default(now),
+    createdAt: ts("created_at").notNull().default(now),
   },
   (t) => [index("notes_prospect_idx").on(t.prospectId)],
 );
@@ -198,7 +201,7 @@ export const activityLogs = pgTable(
     message: text("message").notNull(),
     /** Détails structurés optionnels, sérialisés en JSON. */
     meta: text("meta"),
-    createdAt: integer("created_at").notNull().default(now),
+    createdAt: ts("created_at").notNull().default(now),
   },
   (t) => [
     index("activity_prospect_idx").on(t.prospectId),
