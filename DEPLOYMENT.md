@@ -1,114 +1,95 @@
-# Déploiement sur Vercel
+# 🚀 Déploiement du CRM Prospection sur Vercel + Supabase
 
-Ce CRM peut être déployé sur Vercel en quelques minutes. Voici les étapes :
+## ✅ Statut Actuel
+- ✓ Code compilé et testable en local
+- ✓ PostgreSQL migrations générées automatiquement
+- ✓ Seed data (30 prospects) prêt à déployer
+- ⏳ En attente : Configuration Supabase + Vercel
 
-## Option 1 : Déploiement rapide via GitHub
+---
 
-### 1. Créer un repository GitHub
-```bash
-git remote add origin https://github.com/YOUR_USERNAME/crm-prospection.git
-git branch -M main
-git push -u origin main
+## 🎯 3 Étapes pour Lancer le CRM en Production
+
+### Étape 1️⃣ : Créer une Base Supabase (2 min)
+
+**Visite :** https://app.supabase.com/projects
+
+1. Clique **"New Project"**
+2. Remplis :
+   - **Nom** : `crm-prospection`
+   - **Password** : `futurriche540000@`
+   - **Region** : `Europe (eu-west-1)` ← IMPORTANT
+3. Clique **"Create new project"**
+4. ⏳ Attends 2 minutes que le projet soit créé
+
+### Étape 2️⃣ : Copier la CONNECTION STRING (30 sec)
+
+Une fois le projet créé :
+
+1. Va dans **Settings → Database**
+2. Clique l'onglet **"Connection Pooling"**
+3. Sélectionne le mode **"Session"**
+4. Copie l'URL complète (ressemble à ça) :
+   ```
+   postgresql://postgres.ABC123DEF:[PASSWORD]@db.ABC123DEF.supabase.co:6543/postgres
+   ```
+
+### Étape 3️⃣ : Configurer Vercel (1 min)
+
+**Visite :** https://vercel.com/dashboard → Ton Projet → Settings
+
+1. Va dans **Environment Variables**
+2. Ajoute une nouvelle variable :
+   - **Nom** : `DATABASE_URL`
+   - **Valeur** : Colle l'URL de Supabase (Étape 2)
+3. Clique **"Save"**
+4. Redéploie : **Deployments → Redeploy**
+
+---
+
+## ✨ C'est Fait !
+
+Après 2-3 minutes, l'app va :
+- ✅ Créer toutes les tables PostgreSQL
+- ✅ Seeder 30 prospects de test
+- ✅ Être prête à l'emploi
+
+**Visite :** https://crm-prospection-5ralpijr7-luigisacco.vercel.app
+
+### 🔑 Comptes de Test
+```
+Email : N'importe quel email
+Password : (Accès libre - pas besoin de mot de passe)
 ```
 
-### 2. Connecter à Vercel
-1. Allez sur [vercel.com](https://vercel.com)
-2. Cliquez sur "New Project"
-3. Sélectionnez votre repository GitHub
-4. Vercel détectera automatiquement que c'est un projet Next.js
-5. Cliquez sur "Deploy"
+---
 
-## Option 2 : Déploiement direct via Vercel CLI
+## 🛠️ Troubleshooting
 
-### 1. Installer Vercel CLI
-```bash
-npm install -g vercel
+**"Application error"** ?
+→ Vérifie que `DATABASE_URL` est bien dans Vercel Environment Variables
+
+**Migrations ne s'appliquent pas** ?
+→ Check que la connection string est correcte et que Supabase est prêt
+
+**Besoin de réinitialiser** ?
+→ Dans Supabase SQL Editor, exécute :
+```sql
+DROP SCHEMA public CASCADE;
+CREATE SCHEMA public;
 ```
 
-### 2. Authentifier
-```bash
-vercel login
-```
+---
 
-### 3. Déployer
-```bash
-vercel --prod
-```
+## 📊 Ce qui Est Inclus
 
-## Configuration de la Base de Données
+✓ Dashboard avec stats 
+✓ Gestion 30 prospects
+✓ Pipeline Kanban
+✓ Module appels & follow-up
+✓ Tâches quotidiennes
+✓ Vue équipe
+✓ Import CSV
+✓ Libre accès (pas d'auth)
 
-### ⚠️ Important pour la Production
-
-SQLite ne persiste pas sur Vercel (système de fichiers éphémère). Pour une utilisation en production, vous avez deux options :
-
-#### Option A : Utiliser Turso (SQLite hébergé - Recommandé)
-```bash
-# 1. Créer un compte sur turso.tech
-# 2. Installer la CLI
-npm install -g @tursodatabase/cli
-
-# 3. Créer une base de données
-turso db create my-crm
-
-# 4. Obtenir la connection string
-turso db show my-crm
-
-# 5. Mettre à jour dans Vercel (Settings > Environment Variables)
-DATABASE_URL=libsql://your-db.turso.io?authToken=YOUR_TOKEN
-```
-
-#### Option B : Utiliser Supabase (PostgreSQL)
-```bash
-# Créer un compte sur supabase.com
-# Créer un nouveau projet
-# Copier la connection string PostgreSQL
-# Ajouter à Vercel Environment Variables
-```
-
-## Variables d'Environnement Vercel
-
-Allez dans **Projet Settings > Environment Variables** et ajoutez :
-
-```
-DATABASE_URL=file:./data/crm.db  (pour dev/preview)
-AUTH_SECRET=votre_clé_secrète_très_longue_et_aléatoire
-```
-
-## Accès à l'Application
-
-- **URL de production** : https://your-project.vercel.app
-- **Login** : Accès libre - entrez simplement un email (ex: test@example.com)
-- **Pas de mot de passe requis** - connexion instantanée
-
-## Données de Démonstration
-
-La base de données est pré-remplie avec :
-- 30 prospects réalistes (4 depuis Google Sheet + 26 générés)
-- 3 utilisateurs (Arthur, Yassine, Luigi)
-- Appels, relances, notes, tâches pré-remplies
-- Données prêtes à être testées
-
-Pour réinitialiser la base de données localement :
-```bash
-npm run reset
-npm run seed
-```
-
-## Troubleshooting
-
-### "Module not found: better-sqlite3"
-Cette dépendance native est compilée lors du build. Vercel gère cela automatiquement.
-
-### Données effacées après déploiement
-C'est normal avec SQLite. Passez à Turso ou Supabase pour la persistance.
-
-### Erreur lors du login
-- Vérifiez que `AUTH_SECRET` est défini dans Vercel
-- Assurez-vous que la base de données existe
-
-## Support
-
-Pour toute question sur le déploiement :
-- [Vercel Docs](https://vercel.com/docs)
-- [Next.js Deployment](https://nextjs.org/docs/deployment)
-- [Turso SQLite](https://docs.turso.tech)
+**Le CRM est maintenant prêt pour la production !** 🎉
