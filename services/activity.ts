@@ -7,6 +7,7 @@ import { uid } from "@/lib/utils";
  * Journalise une action importante.
  * Toute mutation métier passe par ici : c'est ce qui alimente la timeline
  * des fiches prospect et la vue Équipe.
+ * (Fire-and-forget: ne bloque pas, mais l'erreur est loggée en console)
  */
 export function logActivity(input: {
   type: ActivityType;
@@ -25,7 +26,7 @@ export function logActivity(input: {
       meta: input.meta ? JSON.stringify(input.meta) : null,
       createdAt: Date.now(),
     })
-    .run();
+    .catch((err) => console.error("Activity log error:", err));
 }
 
 export type ActivityEntry = {
