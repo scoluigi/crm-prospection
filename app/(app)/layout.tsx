@@ -1,7 +1,6 @@
 import { requireUser } from "@/lib/auth";
 import { getTeam } from "@/services/users";
-import { getActiveSession } from "@/services/sessions";
-import { countCallsToday } from "@/services/calls";
+import { callsReportedToday, getActiveSession } from "@/services/sessions";
 import { AppShell } from "@/components/layout/app-shell";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
@@ -9,7 +8,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const [team, session, callsToday] = await Promise.all([
     getTeam(),
     getActiveSession(user.id),
-    countCallsToday(user.id),
+    callsReportedToday(user.id),
   ]);
 
   return (

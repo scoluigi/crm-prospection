@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { bigint, boolean, index, pgTable, text } from "drizzle-orm/pg-core";
+import { bigint, boolean, index, integer, pgTable, text } from "drizzle-orm/pg-core";
 import type { ActivityType, CallOutcome, ProspectStatus, UserRole } from "@/lib/constants";
 
 /** Horodatage epoch en millisecondes : dépasse int32, doit être un bigint en PostgreSQL. */
@@ -85,6 +85,8 @@ export const sessions = pgTable(
     startedAt: ts("started_at").notNull().default(now),
     /** `null` = session en cours (personne « en ligne »). */
     endedAt: ts("ended_at"),
+    /** Nombre d'appels saisi au pointage de sortie. */
+    callsCount: integer("calls_count"),
   },
   (t) => [index("sessions_user_idx").on(t.userId), index("sessions_started_idx").on(t.startedAt)],
 );

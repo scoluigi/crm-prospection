@@ -136,29 +136,39 @@ async function main() {
     }
   }
 
-  // Appels du jour, répartis pour animer le classement.
-  const todayCalls: Record<string, number> = { [arthur.id]: 9, [yassine.id]: 6, [luigi.id]: 13 };
+  // Sessions pointées du jour, pour animer le classement.
+  console.log("Sessions…");
   const startToday = new Date();
-  startToday.setHours(8, 0, 0, 0);
-  for (const [userId, count] of Object.entries(todayCalls)) {
-    for (let i = 0; i < count; i++) {
-      await db.insert(calls).values({
+  startToday.setHours(9, 0, 0, 0);
+  const todaySessions: { user: (typeof team)[number]; blocs: number[] }[] = [
+    { user: arthur, blocs: [5, 4] }, // 9 appels
+    { user: yassine, blocs: [6] }, // 6 appels
+    { user: luigi, blocs: [8, 5] }, // 13 appels
+  ];
+  let cursor = startToday.getTime();
+  for (const { user, blocs } of todaySessions) {
+    let t = cursor;
+    for (const nb of blocs) {
+      const dur = (20 + rand(30)) * 60_000;
+      await db.insert(sessions).values({
         id: uid(),
-        userId,
-        prospectId: null,
-        outcome: null,
-        notes: null,
-        calledAt: startToday.getTime() + i * 12 * 60_000 + rand(5) * 60_000,
+        userId: user.id,
+        startedAt: t,
+        endedAt: t + dur,
+        callsCount: nb,
       });
+      t += dur + 10 * 60_000;
     }
+    cursor += 15 * 60_000;
   }
 
   // Une session de prospection en cours (Luigi « en ligne »).
   await db.insert(sessions).values({
     id: uid(),
     userId: luigi.id,
-    startedAt: now - 35 * 60_000,
+    startedAt: now - 22 * 60_000,
     endedAt: null,
+    callsCount: null,
   });
 
   console.log("\nSeed terminé.");

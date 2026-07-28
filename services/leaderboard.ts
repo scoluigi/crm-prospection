@@ -1,5 +1,5 @@
 import { gte, sql } from "drizzle-orm";
-import { db, calls, sessions } from "@/lib/db";
+import { db, sessions } from "@/lib/db";
 import { startOfTodayMs } from "@/lib/utils";
 import { getTeam } from "./users";
 
@@ -15,22 +15,21 @@ export type LeaderRow = {
 
 const WEEK_MS = 7 * 86_400_000;
 
-async function callsByUserSince(since: number): Promise<Map<string, number>> {
+async function reportedByUserSince(since: number): Promise<Map<string, number>> {
   const rows = await db
-    .select({ userId: calls.userId, n: sql<number>`count(*)::int` })
-    .from(calls)
-    .where(gte(calls.calledAt, since))
-    .groupBy(calls.userId);
+    .select({ userId: sessions.userId, n: sql<number>`coalesce(sum(${sessions.callsCount}), 0)::int` })
+    .from(sessions)
+    .where(gte(sessions.startedAt, since))
+    .groupBy(sessions.userId);
   return new Map(rows.map((r) => [r.userId, Number(r.n)]));
 }
 
-/** Classement des associés : appels du jour, de la semaine, et présence en cours. */
+/** Classement des associés : appels déclarés du jour, de la semaine, et présence en cours. */
 export async function getLeaderboard(): Promise<LeaderRow[]> {
-  const startToday = startOfTodayMs();
   const [team, today, week, active] = await Promise.all([
     getTeam(),
-    callsByUserSince(startToday),
-    callsByUserSince(Date.now() - WEEK_MS),
+    reportedByUserSince(startOfTodayMs()),
+    reportedByUserSince(Date.now() - WEEK_MS),
     db
       .select({ userId: sessions.userId, startedAt: sessions.startedAt })
       .from(sessions)
