@@ -48,3 +48,23 @@ export async function callsReportedToday(userId: string): Promise<number> {
     .where(and(eq(sessions.userId, userId), gte(sessions.startedAt, startOfTodayMs())));
   return row?.n ?? 0;
 }
+
+/**
+ * Fixe le total d'appels du jour pour un associé (correction manuelle).
+ * On enregistre un ajustement (session instantanée) pour atteindre la valeur voulue.
+ */
+export async function setReportedToday(userId: string, target: number): Promise<number> {
+  const current = await callsReportedToday(userId);
+  const delta = Math.max(0, Math.floor(target)) - current;
+  if (delta !== 0) {
+    const now = Date.now();
+    await db.insert(sessions).values({
+      id: uid(),
+      userId,
+      startedAt: now,
+      endedAt: now,
+      callsCount: delta,
+    });
+  }
+  return Math.max(0, Math.floor(target));
+}

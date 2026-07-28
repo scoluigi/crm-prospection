@@ -3,7 +3,7 @@ import { getLeaderboard } from "@/services/leaderboard";
 import { Leaderboard } from "@/components/classement/leaderboard";
 
 export default async function ClassementPage() {
-  await requireUser();
+  const user = await requireUser();
   const rows = await getLeaderboard();
 
   return (
@@ -14,7 +14,7 @@ export default async function ClassementPage() {
           Qui prospecte le plus ? Un peu de concurrence saine entre associés.
         </p>
       </div>
-      <Leaderboard rows={rows} />
+      <Leaderboard rows={rows} currentUserId={user.id} />
     </div>
   );
 }

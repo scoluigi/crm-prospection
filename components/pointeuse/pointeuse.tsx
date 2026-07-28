@@ -36,7 +36,8 @@ export function Pointeuse({
   const [startedAt, setStartedAt] = useState<number | null>(initialStartedAt);
   const [callsToday, setCallsToday] = useState(initialCallsToday);
 
-  const [showEntry, setShowEntry] = useState(!initialActive);
+  // La pointeuse s'affiche à chaque arrivée sur le site.
+  const [showEntry, setShowEntry] = useState(true);
   const [showPointe, setShowPointe] = useState(false);
   const [minutes, setMinutes] = useState(0);
   const [input, setInput] = useState("");
@@ -47,7 +48,8 @@ export function Pointeuse({
     startTransition(async () => {
       await startSessionAction();
       setActive(true);
-      setStartedAt(Date.now());
+      // Conserve le chrono si une session était déjà ouverte.
+      setStartedAt((prev) => prev ?? Date.now());
       setShowEntry(false);
       exitArmed.current = true;
     });
