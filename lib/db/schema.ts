@@ -1,49 +1,24 @@
 import { sql } from "drizzle-orm";
-import { bigint, boolean, index, integer, pgTable, text, real } from "drizzle-orm/pg-core";
+import { bigint, boolean, index, pgTable, text } from "drizzle-orm/pg-core";
+import type { ActivityType, CallOutcome, ProspectStatus, UserRole } from "@/lib/constants";
 
 /** Horodatage epoch en millisecondes : dépasse int32, doit être un bigint en PostgreSQL. */
 const ts = (name: string) => bigint(name, { mode: "number" });
-import type {
-  ActivityType,
-  CallOutcome,
-  InterestLevel,
-  ProspectStatus,
-  TaskPriority,
-  TaskStatus,
-  TaskType,
-  UserRole,
-} from "@/lib/constants";
-
-/**
- * Conventions :
- * - Les identifiants sont des UUID texte (générés côté application).
- * - Les horodatages complets sont stockés en epoch millisecondes (integer).
- * - Les dates « métier » sans heure (relance, deadline) sont stockées en texte ISO `YYYY-MM-DD`,
- *   ce qui évite tout décalage de fuseau horaire sur les comparaisons « aujourd'hui ».
- */
-
 const now = sql`(extract(epoch from now()) * 1000)::bigint`;
 
-// ---------------------------------------------------------------------------
-// Utilisateurs (les 3 associés)
-// ---------------------------------------------------------------------------
-
+// Utilisateurs (les associés)
 export const users = pgTable("users", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
   email: text("email").notNull().unique(),
   passwordHash: text("password_hash").notNull(),
   role: text("role").$type<UserRole>().notNull().default("associe"),
-  /** Couleur d'accent utilisée pour l'avatar et les graphiques d'équipe. */
   color: text("color").notNull().default("#6366f1"),
   active: boolean("active").notNull().default(true),
   createdAt: ts("created_at").notNull().default(now),
 });
 
-// ---------------------------------------------------------------------------
-// Prospects
-// ---------------------------------------------------------------------------
-
+// Leads / prospects — volontairement minimaliste
 export const prospects = pgTable(
   "prospects",
   {
@@ -51,26 +26,22 @@ export const prospects = pgTable(
     companyName: text("company_name").notNull(),
     contactName: text("contact_name"),
     phone: text("phone"),
-    email: text("email"),
-    website: text("website"),
-    sector: text("sector"),
-    city: text("city"),
+    /** Où le lead a été trouvé : Google Maps, LinkedIn, recommandation… */
     source: text("source"),
     status: text("status").$type<ProspectStatus>().notNull().default("a_contacter"),
-    interest: text("interest").$type<InterestLevel>().notNull().default("inconnu"),
     ownerId: text("owner_id")
       .notNull()
       .references(() => users.id),
-    /** Date/heure du dernier appel ou échange enregistré (epoch ms). */
+    /** Dernier appel enregistré (epoch ms). */
     lastContactAt: ts("last_contact_at"),
-    /** Prochaine relance planifiée, format `YYYY-MM-DD`. Miroir de la relance en attente la plus proche. */
+    /** Trois dates de relance successives, format `YYYY-MM-DD`. */
+    relance1: text("relance1"),
+    relance2: text("relance2"),
+    relance3: text("relance3"),
+    /** Miroir de la prochaine relance à venir (calculé à l'enregistrement) — sert au tri. */
     nextFollowUp: text("next_follow_up"),
     notes: text("notes"),
-    /** Montant estimé de la prestation, en euros. */
-    estimatedAmount: real("estimated_amount"),
-    /** Besoin identifié : « site vitrine », « refonte », « SEO »… */
-    identifiedNeed: text("identified_need"),
-    /** Clé de déduplication : téléphone normalisé + nom d'entreprise normalisé. */
+    /** Clé de déduplication : téléphone + nom d'entreprise normalisés. */
     dedupeKey: text("dedupe_key"),
     createdAt: ts("created_at").notNull().default(now),
     updatedAt: ts("updated_at").notNull().default(now),
@@ -83,113 +54,42 @@ export const prospects = pgTable(
   ],
 );
 
-// ---------------------------------------------------------------------------
-// Tâches (todo quotidienne)
-// ---------------------------------------------------------------------------
-
-export const tasks = pgTable(
-  "tasks",
-  {
-    id: text("id").primaryKey(),
-    title: text("title").notNull(),
-    type: text("type").$type<TaskType>().notNull().default("autre"),
-    priority: text("priority").$type<TaskPriority>().notNull().default("normale"),
-    status: text("status").$type<TaskStatus>().notNull().default("a_faire"),
-    /** Responsable de la tâche. `null` = tâche commune à l'équipe. */
-    assigneeId: text("assignee_id").references(() => users.id),
-    prospectId: text("prospect_id").references(() => prospects.id, { onDelete: "cascade" }),
-    /** Échéance au format `YYYY-MM-DD`. */
-    dueDate: text("due_date").notNull(),
-    comment: text("comment"),
-    createdById: text("created_by_id").references(() => users.id),
-    completedAt: ts("completed_at"),
-    createdAt: ts("created_at").notNull().default(now),
-    updatedAt: ts("updated_at").notNull().default(now),
-  },
-  (t) => [
-    index("tasks_due_idx").on(t.dueDate),
-    index("tasks_assignee_idx").on(t.assigneeId),
-    index("tasks_status_idx").on(t.status),
-  ],
-);
-
-// ---------------------------------------------------------------------------
-// Appels (cold call & rappels)
-// ---------------------------------------------------------------------------
-
+// Appels — un appel peut être « solo » (pointage sans lead précis)
 export const calls = pgTable(
   "calls",
   {
     id: text("id").primaryKey(),
-    prospectId: text("prospect_id")
-      .notNull()
-      .references(() => prospects.id, { onDelete: "cascade" }),
+    prospectId: text("prospect_id").references(() => prospects.id, { onDelete: "cascade" }),
     userId: text("user_id")
       .notNull()
       .references(() => users.id),
-    outcome: text("outcome").$type<CallOutcome>().notNull(),
+    outcome: text("outcome").$type<CallOutcome>(),
     notes: text("notes"),
-    /** Durée de l'appel en minutes (saisie optionnelle). */
-    durationMin: integer("duration_min"),
     calledAt: ts("called_at").notNull().default(now),
   },
-  (t) => [index("calls_prospect_idx").on(t.prospectId), index("calls_date_idx").on(t.calledAt)],
-);
-
-// ---------------------------------------------------------------------------
-// Relances
-// ---------------------------------------------------------------------------
-
-export const reminders = pgTable(
-  "reminders",
-  {
-    id: text("id").primaryKey(),
-    prospectId: text("prospect_id")
-      .notNull()
-      .references(() => prospects.id, { onDelete: "cascade" }),
-    assigneeId: text("assignee_id")
-      .notNull()
-      .references(() => users.id),
-    /** Date prévue de la relance, format `YYYY-MM-DD`. */
-    dueDate: text("due_date").notNull(),
-    /** `pending` = à faire, `done` = effectuée, `cancelled` = annulée. */
-    status: text("status").$type<"pending" | "done" | "cancelled">().notNull().default("pending"),
-    channel: text("channel").$type<"appel" | "email" | "sms" | "autre">().notNull().default("appel"),
-    note: text("note"),
-    completedAt: ts("completed_at"),
-    createdAt: ts("created_at").notNull().default(now),
-  },
   (t) => [
-    index("reminders_due_idx").on(t.dueDate),
-    index("reminders_status_idx").on(t.status),
-    index("reminders_prospect_idx").on(t.prospectId),
+    index("calls_user_idx").on(t.userId),
+    index("calls_date_idx").on(t.calledAt),
+    index("calls_prospect_idx").on(t.prospectId),
   ],
 );
 
-// ---------------------------------------------------------------------------
-// Notes internes
-// ---------------------------------------------------------------------------
-
-export const notes = pgTable(
-  "notes",
+// Sessions de prospection (pointeuse) — présence + durée
+export const sessions = pgTable(
+  "sessions",
   {
     id: text("id").primaryKey(),
-    prospectId: text("prospect_id")
-      .notNull()
-      .references(() => prospects.id, { onDelete: "cascade" }),
-    authorId: text("author_id")
+    userId: text("user_id")
       .notNull()
       .references(() => users.id),
-    content: text("content").notNull(),
-    createdAt: ts("created_at").notNull().default(now),
+    startedAt: ts("started_at").notNull().default(now),
+    /** `null` = session en cours (personne « en ligne »). */
+    endedAt: ts("ended_at"),
   },
-  (t) => [index("notes_prospect_idx").on(t.prospectId)],
+  (t) => [index("sessions_user_idx").on(t.userId), index("sessions_started_idx").on(t.startedAt)],
 );
 
-// ---------------------------------------------------------------------------
-// Journal d'activité
-// ---------------------------------------------------------------------------
-
+// Journal d'activité (historique d'un lead)
 export const activityLogs = pgTable(
   "activity_logs",
   {
@@ -197,33 +97,20 @@ export const activityLogs = pgTable(
     type: text("type").$type<ActivityType>().notNull(),
     userId: text("user_id").references(() => users.id),
     prospectId: text("prospect_id").references(() => prospects.id, { onDelete: "cascade" }),
-    /** Description lisible, déjà formatée pour l'affichage. */
     message: text("message").notNull(),
-    /** Détails structurés optionnels, sérialisés en JSON. */
     meta: text("meta"),
     createdAt: ts("created_at").notNull().default(now),
   },
-  (t) => [
-    index("activity_prospect_idx").on(t.prospectId),
-    index("activity_date_idx").on(t.createdAt),
-  ],
+  (t) => [index("activity_prospect_idx").on(t.prospectId), index("activity_date_idx").on(t.createdAt)],
 );
-
-// ---------------------------------------------------------------------------
-// Types inférés
-// ---------------------------------------------------------------------------
 
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
 export type Prospect = typeof prospects.$inferSelect;
 export type NewProspect = typeof prospects.$inferInsert;
-export type Task = typeof tasks.$inferSelect;
-export type NewTask = typeof tasks.$inferInsert;
 export type Call = typeof calls.$inferSelect;
 export type NewCall = typeof calls.$inferInsert;
-export type Reminder = typeof reminders.$inferSelect;
-export type NewReminder = typeof reminders.$inferInsert;
-export type Note = typeof notes.$inferSelect;
-export type NewNote = typeof notes.$inferInsert;
+export type Session = typeof sessions.$inferSelect;
+export type NewSession = typeof sessions.$inferInsert;
 export type ActivityLog = typeof activityLogs.$inferSelect;
 export type NewActivityLog = typeof activityLogs.$inferInsert;

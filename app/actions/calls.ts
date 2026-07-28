@@ -9,51 +9,31 @@ import type { ActionState } from "./prospects";
 
 const callSchema = z.object({
   prospectId: z.string().min(1),
-  outcome: z.enum(CALL_OUTCOMES),
+  outcome: z.enum(CALL_OUTCOMES).optional(),
   notes: z.string().optional(),
-  nextFollowUp: z.string().optional(),
-  durationMin: z.string().optional(),
 });
 
-/**
- * Enregistre un appel. Point d'entrée unique utilisé par le module Cold Call
- * et par la fiche prospect.
- */
+/** Enregistre un appel depuis une fiche lead (résultat optionnel). */
 export async function logCallAction(_prev: ActionState, formData: FormData): Promise<ActionState> {
   const user = await requireUser();
 
   const parsed = callSchema.safeParse({
     prospectId: String(formData.get("prospectId") ?? ""),
-    outcome: String(formData.get("outcome") ?? ""),
+    outcome: formData.get("outcome") ? String(formData.get("outcome")) : undefined,
     notes: formData.get("notes") ? String(formData.get("notes")) : undefined,
-    nextFollowUp: formData.get("nextFollowUp") ? String(formData.get("nextFollowUp")) : undefined,
-    durationMin: formData.get("durationMin") ? String(formData.get("durationMin")) : undefined,
   });
-
-  if (!parsed.success) {
-    return { error: parsed.error.issues[0]?.message ?? "Résultat d'appel invalide" };
-  }
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Appel invalide" };
 
   const d = parsed.data;
-  const duration = d.durationMin ? Number.parseInt(d.durationMin, 10) : null;
-
   await logCall({
-    prospectId: d.prospectId,
     userId: user.id,
-    outcome: d.outcome,
+    prospectId: d.prospectId,
+    outcome: d.outcome ?? null,
     notes: d.notes || null,
-    durationMin: Number.isFinite(duration) ? duration : null,
-    nextFollowUp: d.nextFollowUp || null,
   });
 
   revalidatePath("/");
-  revalidatePath("/cold-call");
-  revalidatePath("/relances");
-  revalidatePath("/prospects");
-  revalidatePath("/pipeline");
-  revalidatePath("/aujourdhui");
-  revalidatePath("/equipe");
+  revalidatePath("/classement");
   revalidatePath(`/prospects/${d.prospectId}`);
-
   return { ok: true };
 }

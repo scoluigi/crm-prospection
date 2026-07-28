@@ -1,7 +1,5 @@
 import {
   CalendarClock,
-  CheckSquare,
-  FileUp,
   PhoneCall,
   PlusCircle,
   RefreshCw,
@@ -18,13 +16,9 @@ const ICONS: Record<ActivityType, LucideIcon> = {
   prospect_cree: PlusCircle,
   statut_change: RefreshCw,
   appel_effectue: PhoneCall,
-  relance_programmee: CalendarClock,
-  relance_reportee: CalendarClock,
-  tache_creee: CheckSquare,
-  tache_terminee: CheckSquare,
   responsable_change: UserCog,
-  note_ajoutee: StickyNote,
-  import_csv: FileUp,
+  note_modifiee: StickyNote,
+  relance_planifiee: CalendarClock,
 };
 
 export function ActivityTimeline({ entries }: { entries: ActivityEntry[] }) {
@@ -35,7 +29,7 @@ export function ActivityTimeline({ entries }: { entries: ActivityEntry[] }) {
   return (
     <ol className="flex flex-col gap-0">
       {entries.map((entry, idx) => {
-        const Icon = ICONS[entry.type];
+        const Icon = ICONS[entry.type] ?? RefreshCw;
         return (
           <li key={entry.id} className="flex gap-3">
             <div className="flex flex-col items-center">

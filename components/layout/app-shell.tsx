@@ -17,21 +17,26 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { NewProspectDialog } from "@/components/prospects/new-prospect-dialog";
+import { Pointeuse } from "@/components/pointeuse/pointeuse";
 import type { TeamMember } from "@/services/users";
 import { ROLE_LABELS } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
-export type NavCounts = { todo: number; relances: number; coldcall: number };
+export type PointeuseData = {
+  active: boolean;
+  startedAt: number | null;
+  callsToday: number;
+};
 
 export function AppShell({
   user,
   team,
-  counts,
+  pointeuse,
   children,
 }: {
   user: TeamMember;
   team: TeamMember[];
-  counts: NavCounts;
+  pointeuse: PointeuseData;
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
@@ -44,7 +49,6 @@ export function AppShell({
     <nav className="flex flex-1 flex-col gap-0.5 overflow-y-auto p-2">
       {NAV_ITEMS.map((item) => {
         const active = isActive(item.href);
-        const count = item.badge ? counts[item.badge] : 0;
         return (
           <Link
             key={item.href}
@@ -59,18 +63,6 @@ export function AppShell({
           >
             <item.icon className={cn("size-4 shrink-0", active ? "text-indigo-600" : "text-slate-400")} />
             <span className="flex-1 truncate">{item.label}</span>
-            {count > 0 && (
-              <span
-                className={cn(
-                  "min-w-5 rounded-full px-1.5 py-0.5 text-center text-[10px] font-semibold",
-                  item.badge === "relances" && counts.relances > 0
-                    ? "bg-rose-100 text-rose-700"
-                    : "bg-slate-200 text-slate-700",
-                )}
-              >
-                {count > 99 ? "99+" : count}
-              </span>
-            )}
           </Link>
         );
       })}
@@ -119,14 +111,12 @@ export function AppShell({
 
   return (
     <div className="flex min-h-screen">
-      {/* Barre latérale — desktop */}
       <aside className="no-print fixed inset-y-0 left-0 hidden w-56 flex-col border-r border-slate-200 bg-white lg:flex">
         {brand}
         {nav}
         {footer}
       </aside>
 
-      {/* Barre latérale — mobile */}
       {mobileOpen && (
         <div className="no-print fixed inset-0 z-40 lg:hidden">
           <div
@@ -148,7 +138,6 @@ export function AppShell({
       )}
 
       <div className="flex min-w-0 flex-1 flex-col lg:pl-56">
-        {/* Barre supérieure */}
         <header className="no-print sticky top-0 z-30 flex h-14 shrink-0 items-center gap-2 border-b border-slate-200 bg-white/90 px-3 backdrop-blur sm:px-5">
           <Button
             variant="ghost"
@@ -162,11 +151,17 @@ export function AppShell({
 
           <div className="flex-1" />
 
+          <Pointeuse
+            initialActive={pointeuse.active}
+            initialStartedAt={pointeuse.startedAt}
+            initialCallsToday={pointeuse.callsToday}
+          />
+
           <NewProspectDialog team={team} currentUserId={user.id}>
             <Button size="sm">
               <Plus />
-              <span className="hidden sm:inline">Nouveau prospect</span>
-              <span className="sm:hidden">Prospect</span>
+              <span className="hidden sm:inline">Nouveau lead</span>
+              <span className="sm:hidden">Lead</span>
             </Button>
           </NewProspectDialog>
         </header>

@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  INTEREST_LABELS,
-  INTEREST_LEVELS,
-  LEAD_SOURCES,
-  PROSPECT_STATUSES,
-  STATUS_LABELS,
-} from "@/lib/constants";
+import { LEAD_SOURCES, PROSPECT_STATUSES, STATUS_LABELS } from "@/lib/constants";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -39,10 +33,7 @@ function Field({
   );
 }
 
-/**
- * Champs partagés entre la création et l'édition d'un prospect.
- * Composant non contrôlé : les valeurs sont lues par le Server Action via `FormData`.
- */
+/** Champs d'un lead — création & édition. Non contrôlé : lu via FormData par le Server Action. */
 export function ProspectFormFields({
   team,
   defaultOwnerId,
@@ -56,7 +47,7 @@ export function ProspectFormFields({
 
   return (
     <div className="grid gap-4 sm:grid-cols-2">
-      <Field label="Nom de l'entreprise *" htmlFor="companyName" className="sm:col-span-2">
+      <Field label="Entreprise *" htmlFor="companyName" className="sm:col-span-2">
         <Input
           id="companyName"
           name="companyName"
@@ -67,7 +58,7 @@ export function ProspectFormFields({
         />
       </Field>
 
-      <Field label="Nom du contact" htmlFor="contactName">
+      <Field label="Contact" htmlFor="contactName">
         <Input id="contactName" name="contactName" defaultValue={p?.contactName ?? ""} placeholder="Jean Dupont" />
       </Field>
 
@@ -75,23 +66,7 @@ export function ProspectFormFields({
         <Input id="phone" name="phone" type="tel" defaultValue={p?.phone ?? ""} placeholder="06 12 34 56 78" />
       </Field>
 
-      <Field label="Email" htmlFor="email">
-        <Input id="email" name="email" type="email" defaultValue={p?.email ?? ""} placeholder="contact@entreprise.fr" />
-      </Field>
-
-      <Field label="Site web existant" htmlFor="website">
-        <Input id="website" name="website" defaultValue={p?.website ?? ""} placeholder="entreprise.fr ou « aucun »" />
-      </Field>
-
-      <Field label="Secteur d'activité" htmlFor="sector">
-        <Input id="sector" name="sector" defaultValue={p?.sector ?? ""} placeholder="Pisciniste" />
-      </Field>
-
-      <Field label="Ville / zone" htmlFor="city">
-        <Input id="city" name="city" defaultValue={p?.city ?? ""} placeholder="Metz" />
-      </Field>
-
-      <Field label="Source du lead">
+      <Field label="Où as-tu eu le lead ?">
         <Select name="source" defaultValue={p?.source ?? "Cold call"}>
           <SelectTrigger>
             <SelectValue placeholder="Source" />
@@ -106,7 +81,7 @@ export function ProspectFormFields({
         </Select>
       </Field>
 
-      <Field label="Associé responsable *">
+      <Field label="Responsable *">
         <Select name="ownerId" defaultValue={p?.ownerId ?? defaultOwnerId}>
           <SelectTrigger>
             <SelectValue placeholder="Responsable" />
@@ -121,7 +96,7 @@ export function ProspectFormFields({
         </Select>
       </Field>
 
-      <Field label="Statut commercial">
+      <Field label="Statut" className="sm:col-span-2">
         <Select name="status" defaultValue={p?.status ?? "a_contacter"}>
           <SelectTrigger>
             <SelectValue placeholder="Statut" />
@@ -136,42 +111,14 @@ export function ProspectFormFields({
         </Select>
       </Field>
 
-      <Field label="Niveau d'intérêt">
-        <Select name="interest" defaultValue={p?.interest ?? "inconnu"}>
-          <SelectTrigger>
-            <SelectValue placeholder="Intérêt" />
-          </SelectTrigger>
-          <SelectContent>
-            {INTEREST_LEVELS.map((i) => (
-              <SelectItem key={i} value={i}>
-                {INTEREST_LABELS[i]}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+      <Field label="1re relance" htmlFor="relance1">
+        <Input id="relance1" name="relance1" type="date" defaultValue={p?.relance1 ?? ""} />
       </Field>
-
-      <Field label="Montant estimé (€)" htmlFor="estimatedAmount">
-        <Input
-          id="estimatedAmount"
-          name="estimatedAmount"
-          inputMode="decimal"
-          defaultValue={p?.estimatedAmount ?? ""}
-          placeholder="1500"
-        />
+      <Field label="2e relance" htmlFor="relance2">
+        <Input id="relance2" name="relance2" type="date" defaultValue={p?.relance2 ?? ""} />
       </Field>
-
-      <Field label="Prochaine relance" htmlFor="nextFollowUp">
-        <Input id="nextFollowUp" name="nextFollowUp" type="date" defaultValue={p?.nextFollowUp ?? ""} />
-      </Field>
-
-      <Field label="Besoin identifié" htmlFor="identifiedNeed" className="sm:col-span-2">
-        <Input
-          id="identifiedNeed"
-          name="identifiedNeed"
-          defaultValue={p?.identifiedNeed ?? ""}
-          placeholder="Site vitrine 5 pages + réservation en ligne"
-        />
+      <Field label="3e relance" htmlFor="relance3">
+        <Input id="relance3" name="relance3" type="date" defaultValue={p?.relance3 ?? ""} />
       </Field>
 
       <Field label="Notes" htmlFor="notes" className="sm:col-span-2">

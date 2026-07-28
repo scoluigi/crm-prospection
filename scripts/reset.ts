@@ -1,21 +1,21 @@
 /**
- * Réinitialise complètement la base : supprime le fichier SQLite et le recrée
- * avec le schéma à jour. Utile pendant le développement quand le schéma change.
- *
- * Usage : npm run db:reset
+ * Vide toutes les tables (PostgreSQL). Usage : npm run db:reset
  */
-import fs from "node:fs";
-import path from "node:path";
 import "./load-env";
+import { db, activityLogs, sessions, calls, prospects, users } from "@/lib/db";
 
-const dbPath = path.resolve(process.cwd(), process.env.DATABASE_URL ?? "./data/crm.db");
-
-for (const suffix of ["", "-shm", "-wal"]) {
-  const file = `${dbPath}${suffix}`;
-  if (fs.existsSync(file)) {
-    fs.rmSync(file);
-    console.log(`Supprimé : ${file}`);
-  }
+async function main() {
+  await db.delete(activityLogs);
+  await db.delete(sessions);
+  await db.delete(calls);
+  await db.delete(prospects);
+  await db.delete(users);
+  console.log("Base vidée. Lance `npm run db:seed` pour recharger les données de démo.");
 }
 
-console.log("Base réinitialisée. Lance `npm run setup` pour recréer le schéma et les données de démo.");
+main()
+  .then(() => process.exit(0))
+  .catch((err) => {
+    console.error(err);
+    process.exit(1);
+  });

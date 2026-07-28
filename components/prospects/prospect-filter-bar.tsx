@@ -12,38 +12,24 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  INTEREST_LABELS,
-  INTEREST_LEVELS,
-  PROSPECT_STATUSES,
-  STATUS_LABELS,
-} from "@/lib/constants";
+import { PROSPECT_STATUSES, STATUS_LABELS } from "@/lib/constants";
 import type { TeamMember } from "@/services/users";
 
 const DUE_OPTIONS = [
   { value: "all", label: "Toutes les relances" },
-  { value: "overdue", label: "Relances en retard" },
-  { value: "today", label: "Relance aujourd'hui" },
-  { value: "week", label: "Relance sous 7 jours" },
-  { value: "none", label: "Sans relance planifiée" },
+  { value: "overdue", label: "En retard" },
+  { value: "today", label: "Aujourd'hui" },
+  { value: "week", label: "Sous 7 jours" },
+  { value: "none", label: "Sans relance" },
 ];
 
 const SORT_OPTIONS = [
   { value: "recent", label: "Récemment modifiés" },
   { value: "relance", label: "Relance la plus proche" },
-  { value: "montant", label: "Montant estimé" },
   { value: "entreprise", label: "Nom d'entreprise" },
 ];
 
-export function ProspectFilterBar({
-  team,
-  cities,
-  sectors,
-}: {
-  team: TeamMember[];
-  cities: string[];
-  sectors: string[];
-}) {
+export function ProspectFilterBar({ team }: { team: TeamMember[] }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [, startTransition] = useTransition();
@@ -53,7 +39,7 @@ export function ProspectFilterBar({
       const next = new URLSearchParams(searchParams.toString());
       if (!value || value === "all") next.delete(key);
       else next.set(key, value);
-      startTransition(() => router.push(`/prospects?${next.toString()}`));
+      startTransition(() => router.push(`/?${next.toString()}`));
     },
     [router, searchParams],
   );
@@ -67,19 +53,19 @@ export function ProspectFilterBar({
         <Input
           defaultValue={searchParams.get("q") ?? ""}
           onChange={(e) => set("q", e.target.value)}
-          placeholder="Rechercher une entreprise, un contact, un téléphone, un email…"
+          placeholder="Rechercher une entreprise, un contact, un téléphone…"
           className="pl-8"
         />
       </div>
 
       <div className="flex flex-wrap gap-2">
         <Select value={searchParams.get("status") ?? "all"} onValueChange={(v) => set("status", v)}>
-          <SelectTrigger className="w-[160px]">
+          <SelectTrigger className="w-[150px]">
             <SelectValue placeholder="Statut" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Tous les statuts</SelectItem>
-            <SelectItem value="actifs">Pipeline actif</SelectItem>
+            <SelectItem value="actifs">En cours</SelectItem>
             {PROSPECT_STATUSES.map((s) => (
               <SelectItem key={s} value={s}>
                 {STATUS_LABELS[s]}
@@ -102,22 +88,8 @@ export function ProspectFilterBar({
           </SelectContent>
         </Select>
 
-        <Select value={searchParams.get("interest") ?? "all"} onValueChange={(v) => set("interest", v)}>
-          <SelectTrigger className="w-[140px]">
-            <SelectValue placeholder="Intérêt" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Tout intérêt</SelectItem>
-            {INTEREST_LEVELS.map((i) => (
-              <SelectItem key={i} value={i}>
-                {INTEREST_LABELS[i]}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
         <Select value={searchParams.get("due") ?? "all"} onValueChange={(v) => set("due", v)}>
-          <SelectTrigger className="w-[190px]">
+          <SelectTrigger className="w-[160px]">
             <SelectValue placeholder="Relance" />
           </SelectTrigger>
           <SelectContent>
@@ -129,40 +101,8 @@ export function ProspectFilterBar({
           </SelectContent>
         </Select>
 
-        {cities.length > 0 && (
-          <Select value={searchParams.get("city") ?? "all"} onValueChange={(v) => set("city", v)}>
-            <SelectTrigger className="w-[140px]">
-              <SelectValue placeholder="Ville" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Toutes les villes</SelectItem>
-              {cities.map((c) => (
-                <SelectItem key={c} value={c}>
-                  {c}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        )}
-
-        {sectors.length > 0 && (
-          <Select value={searchParams.get("sector") ?? "all"} onValueChange={(v) => set("sector", v)}>
-            <SelectTrigger className="w-[160px]">
-              <SelectValue placeholder="Secteur" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Tous les secteurs</SelectItem>
-              {sectors.map((s) => (
-                <SelectItem key={s} value={s}>
-                  {s}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        )}
-
         <Select value={searchParams.get("sort") ?? "recent"} onValueChange={(v) => set("sort", v)}>
-          <SelectTrigger className="w-[190px]">
+          <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Tri" />
           </SelectTrigger>
           <SelectContent>
@@ -175,7 +115,7 @@ export function ProspectFilterBar({
         </Select>
 
         {hasFilters && (
-          <Button variant="ghost" size="sm" onClick={() => router.push("/prospects")}>
+          <Button variant="ghost" size="sm" onClick={() => router.push("/")}>
             <X />
             Réinitialiser
           </Button>
